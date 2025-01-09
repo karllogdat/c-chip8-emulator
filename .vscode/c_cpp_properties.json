@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/build/external/raylib-master/src/**",
                 "${workspaceFolder}/include/**",
-                "${workspaceFolder}/src/**"
+                "${workspaceFolder}/src/**",
+                "${workspaceFolder}/build/external/raylib-master/src"
             ],
             "defines": [
                 "_DEBUG",
@@ -58,7 +59,6 @@
             "cStandard": "c11",
             "cppStandard": "c++14",
             "intelliSenseMode": "clang-x64"
-
         }
     ],
     "version": 4
