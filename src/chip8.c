@@ -50,12 +50,35 @@ void chip8_init(chip8 *machine)
         printf("CHIP8 Initialized Sucessfully\n");
 }
 
-void chip8_load_program(chip8 machine, char *program_path)
+void chip8_load_program(chip8 *machine, char *program_path)
 {
         // TODO: implement program loader
         // for (int i = 0; i < programBuffer.size; i++) {
         //      chip8->memory[i + 0x200] = programBuffer[i];
         // }
+
+        // open file in binary mode
+        // return when fopen returns null
+        FILE *rom = fopen("../resources/programs/breakout.ch8", "rb");
+        if (rom == NULL)
+        {
+                perror("ROM not found.\n");
+                return;
+        }
+
+        // buffer size is max_memory - start_mem_location
+        unsigned char buffer[0xFFF - 0x200];
+        memset(buffer, 0, sizeof(buffer));
+
+        fread(buffer, sizeof(unsigned char), sizeof(buffer), rom);
+
+        for (int i = 0; i < sizeof(buffer); ++i)
+        {
+                machine->memory[i + 0x200] = buffer[i];
+        }
+
+        // close file
+        fclose(rom);
 }
 
 void chip8_emulate_cycle(chip8 *machine)
