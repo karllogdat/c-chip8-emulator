@@ -1,7 +1,9 @@
 #include "chip8.h"
 
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 
 void chip8_init(chip8 *machine)
 {
@@ -90,9 +92,54 @@ void chip8_emulate_cycle(chip8 *machine)
         // decode opcode
         switch (machine->opcode & 0xF000)
         {
+        // 1NNN
+        // goto NNN
+        // jumps to address NNN
+        case 0x1000:
+                // get 12-bit address (NNN) from opcode by bit masking
+                machine->pc = machine->opcode & 0x0FFF;
+                break;
+
+        // ANNN
+        // I = NNN
         case 0xA000:
                 machine->I = machine->opcode & 0x0FFF;
                 // increment by 2 since opcodes are 2 bytes long
+                machine->pc += 2;
+                break;
+
+        // BNNN
+        // PC = V0 + NNN
+        case 0xB000:
+                // extract 12-bit address from opcode
+                unsigned int address = machine->opcode & 0x0FFF;
+
+                // move program counter to specified address
+                machine->pc = machine->V[0] + address;
+
+                if (machine->pc > 0xFFF)
+                {
+                        perror("Overflow Error: PC out of memory bounds");
+                        // wrap around the memory
+                        // this actually might access the reserved memory...
+                        machine->pc &= 0xFFF;
+                }
+                break;
+
+        // CXNN
+        // Vx = rand() & NN
+        case 0xC000:
+                // extract 8-bit address from opcode (NN)
+                unsigned char value = machine->opcode & 0x00FF;
+                // extract register index from opcode
+                unsigned char reg = machine->opcode >> 8 & 0x0F;
+
+                // generate random num from 0-255 and operate bitwise AND
+                // to value (NN)
+                unsigned char rand_num = rand() % 256;
+                machine->V[reg] = rand_num & value;
+
+                // move program counter
                 machine->pc += 2;
                 break;
 
